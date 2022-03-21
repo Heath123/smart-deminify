@@ -92,7 +92,7 @@ function replaceRange(node) {
 
 replaceRange(ast)
 
-// console.log(rename.uniqueNames(ast, name => `s${name}`, i => (i.name.length === 1 || i.name.startsWith('__temp_'))))
+rename.uniqueNames(ast, name => `s${name}`, i => (i.name.length === 1 || i.name.startsWith('__temp_')))
 
 console.log(escodegen.generate(ast))
 
