@@ -8,41 +8,27 @@ function getStart (node) {
 
 module.exports.uniqueNames = (code, getName, needsRenaming) => {
   let nameCounter = 0
-  // The start positions of identifiers that were already processed
-  // This avoids infinite loops as not all identifiers can be renamed
-  const processedIdentifiers = []
+  const identifiers = []
 
-  while (nameCounter < 100000000) {
-    const ctx = new esrefactor.Context(code);
-
-    let identifier
-
-    estraverse.traverse(ctx._syntax, {
-      enter: function (node) {
-        if (node.type === "Identifier" && needsRenaming(node) && !processedIdentifiers.includes(getStart(node))) {
-          identifier = node
-          return estraverse.VisitorOption.Break
-        }
+  estraverse.traverse(code, {
+    enter: function (node) {
+      if (node.type === "Identifier" && needsRenaming(node) ) {
+        identifiers.push(node)
       }
-    })
+    }
+  })
 
-    if (identifier === undefined) {
-      break
+  const ctx = new esrefactor.Context(code)
+
+  for (const identifier of identifiers) {
+    if (!needsRenaming(identifier)) {
+      continue
     }
 
-    // TODO
-    // try {
-      // console.log(identifier)
-      const id = ctx.identify(getStart(identifier))
-      // console.log(id)
-      code = ctx.rename(id, getName(nameCounter));
-      // console.log(identifier.name)
-      // console.log(code)
-    // } catch (err) {
-      // console.warn(err)
-    // }
+    console.log('renaming', identifier)
 
-    processedIdentifiers.push(getStart(identifier))
+    const id = ctx.identify(getStart(identifier))
+    code = ctx.rename(id, getName(nameCounter))
     nameCounter++
   }
 
