@@ -32,11 +32,11 @@ module.exports.uniqueNames = (code, getName, needsRenaming) => {
 
     // TODO
     // try {
-      console.log(identifier)
+      // console.log(identifier)
       const id = ctx.identify(getStart(identifier))
       // console.log(id)
       code = ctx.rename(id, getName(nameCounter));
-      console.log(identifier.name)
+      // console.log(identifier.name)
       // console.log(code)
     // } catch (err) {
       // console.warn(err)

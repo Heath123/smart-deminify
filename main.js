@@ -6,8 +6,13 @@ const path = require('path')
 
 const { isExpressionStatementUsed, replaceNode, parent } = require('./utils')
 
-// Load and parse test.js
-const test = fs.readFileSync(path.join(__dirname, '..', 'test.js'), 'utf8')
+// Load and parse the file in the first argument
+// TODO: Make sure this works when making the js file executable
+if (!process.argv[2]) {
+  console.error('Please provide a file to parse')
+  process.exit(1)
+}
+const test = fs.readFileSync(process.argv[2], 'utf8')
 // Parse very leniently because this is designed to parse any kind of code with little context required
 const ast = acorn.parse(test, {
   ecmaVersion: "latest",
@@ -87,7 +92,7 @@ function replaceRange(node) {
 
 replaceRange(ast)
 
-console.log(rename.uniqueNames(ast, name => `s${name}`, i => (i.name.length === 1 || i.name.startsWith('__temp_'))))
+// console.log(rename.uniqueNames(ast, name => `s${name}`, i => (i.name.length === 1 || i.name.startsWith('__temp_'))))
 
 console.log(escodegen.generate(ast))
 
