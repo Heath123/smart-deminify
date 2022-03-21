@@ -22,6 +22,10 @@ module.exports = function (node, ancestors) {
   const isAssignment = parent(ancestors).type === 'AssignmentExpression'
   const isReturn = parent(ancestors).type === 'ReturnStatement'
 
+  if (isAssignment && isExpressionStatementUsed(parent(ancestors, 2), parent(ancestors, 3))) {
+    return
+  }
+
   const newStatements = []
   
   if (node.type === 'ConditionalExpression') {
