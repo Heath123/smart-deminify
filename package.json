@@ -1,0 +1,26 @@
+{
+  "name": "smart-deminify",
+  "version": "0.0.1",
+  "description": "Undo code size tricks that minifiers use, allowing you to produce readable code from minified output",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Heath123/smart-deminify.git"
+  },
+  "author": "Heath123",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Heath123/smart-deminify/issues"
+  },
+  "homepage": "https://github.com/Heath123/smart-deminify#readme",
+  "dependencies": {
+    "acorn": "^8.7.0",
+    "acorn-walk": "^8.2.0",
+    "escodegen": "^2.0.0",
+    "esrefactor": "github:Heath123/esrefactor",
+    "estraverse": "^5.3.0"
+  }
+}
