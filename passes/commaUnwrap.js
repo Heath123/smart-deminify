@@ -1,4 +1,4 @@
-const { isExpressionStatementUsed, replaceNode, parent } = require('../utils')
+const { isExpressionStatementUsed, replaceNode, parent, canSpliceBefore } = require('../utils')
 const escodegen = require('escodegen')
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comma_Operator
@@ -15,10 +15,8 @@ module.exports = function (node, ancestors) {
     // Splice all the expressions into the body of the parent
     replaceNode(parent(ancestors, 2), parent(ancestors), node.expressions)
   }
-  // Handle the other cases
-  const parentType = parent(ancestors).type
-  // For now just hardcode all the known safe cases
-  if (parentType === 'ReturnStatement' || parentType === 'IfStatement' || parentType === 'SwitchStatement') {
+  
+  if (canSpliceBefore(parent(ancestors))) {
     // Splice all the statements except the last one into before the parent in the grandparent
     replaceNode(parent(ancestors, 2), parent(ancestors), [...node.expressions.slice(0, -1).map(e => ({ type: 'ExpressionStatement', expression: e })), parent(ancestors)])
     // Replace this node with the last expression

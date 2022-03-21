@@ -1,4 +1,4 @@
-const { isExpressionStatementUsed, replaceNode, parent } = require('../utils')
+const { isExpressionStatementUsed, replaceNode, parent, canSpliceBefore } = require('../utils')
 const escodegen = require('escodegen')
 
 // Convert a && b() to if (a) { b() } and a || b() to if (!a) { b() }

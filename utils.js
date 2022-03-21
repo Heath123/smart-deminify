@@ -1,3 +1,5 @@
+const escodegen = require('escodegen')
+
 // Function to find if the value of an ExpressionStatement may be used
 module.exports.isExpressionStatementUsed = function (node, parent) {
   if (node.type !== 'ExpressionStatement') {
@@ -43,6 +45,12 @@ module.exports.replaceNode = function (parent, node, replacementArray) {
       }
       return
     }
+    if (!Array.isArray(parent[field])) {
+      console.warn('Could not replace node in parent', parent, node, replacementArray)
+      console.log(escodegen.generate(parent))
+      // continue
+      throw new Error('Could not replace node in parent')
+    }
     // Find the index of the node in the parent's body
     const index = parent[field].indexOf(node)
     if (index === -1) {
@@ -67,4 +75,10 @@ module.exports.parent = function (ancestors, up) {
     result = found === undefined ? result : found
   }
   return result
+}
+
+// For now just hardcode all the known safe cases
+// TODO: Rename to canMove? Add more cases
+module.exports.canSpliceBefore = function (node) {
+  return node.type === 'ReturnStatement' || node.type === 'IfStatement' || node.type === 'SwitchStatement';
 }

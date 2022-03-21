@@ -1,4 +1,4 @@
-const { isExpressionStatementUsed, replaceNode, parent } = require('../utils')
+const { isExpressionStatementUsed, replaceNode, parent, canSpliceBefore } = require('../utils')
 const escodegen = require('escodegen')
 
 function literalOrSimiliar(node) {

@@ -21,10 +21,10 @@ const ast = acorn.parse(test, {
 
 // Import passes
 const logicalToIf = require('./passes/logicalToIf')
-const ifStatementToBlock = require('./passes/ifStatementToBlock')
+const statementToBlock = require('./passes/statementToBlock')
 const commaUnwrap = require('./passes/commaUnwrap')
 const conditionalToIf = require('./passes/conditionalToIf')
-const unwrapReturnLogical = require('./passes/unwrapReturnLogical')
+const unwrapExpressionLogical = require('./passes/unwrapExpressionLogical')
 const voidToComma = require('./passes/voidToComma')
 const createElseIf = require('./passes/createElseIf')
 
@@ -35,13 +35,18 @@ walk.ancestor(ast, { UnaryExpression: replaceShorthandLiterals })
 // Apply each pass 3 times because some rely on others in somewhat complex ways
 for (let i = 0; i < 3; i++) { 
   // Run these first as some other passes rely on them
-  walk.ancestor(ast, { IfStatement: ifStatementToBlock })
+  walk.ancestor(ast, {
+    IfStatement: statementToBlock,
+    ForStatement: statementToBlock,
+    ForInStatement: statementToBlock,
+    ForOfStatement: statementToBlock
+  })
   walk.ancestor(ast, { UnaryExpression: voidToComma })
 
   walk.ancestor(ast, { SequenceExpression: commaUnwrap })
-  walk.ancestor(ast, { LogicalExpression: logicalToIf })
+  walk.ancestor(ast, { LogicalExpression: logicalToIf }) // TODO: Replace with unwrapExpressionLogical
   walk.ancestor(ast, { ConditionalExpression: conditionalToIf })
-  walk.ancestor(ast, { ReturnStatement: unwrapReturnLogical })
+  walk.ancestor(ast, { LogicalExpression: unwrapExpressionLogical, ConditionalExpression: unwrapExpressionLogical })
   walk.ancestor(ast, { IfStatement: createElseIf })
 
   // console.log(escodegen.generate(ast))
@@ -53,12 +58,21 @@ const unwrapVariableDeclaration = require('./passes/unwrapVariableDeclaration')
 walk.ancestor(ast, { BinaryExpression: swapEqualityComparision })
 walk.ancestor(ast, { VariableDeclaration: unwrapVariableDeclaration })
 
-/* const rename = require('./rename')
+const rename = require('./rename')
+
+let uniqueFakeRange = 1
 
 // Recursively walk the AST and replace { start: x, end: y } with { range: [x, y] }
 // This makes it compatible with esprima
 function replaceRange(node) {
-  if (node.start !== undefined && node.end !== undefined) {
+  if (node.type !== undefined) {
+    if (node.start === undefined && node.end === undefined) {
+      // Fake range to act as a unique identifier for the renaming logic
+      // Extremely hacky, but it works
+      node.start = uniqueFakeRange * 10000000
+      node.end = uniqueFakeRange * 10000000 + 1
+      uniqueFakeRange++
+    }
     node.range = [node.start, node.end]
     delete node.start
     delete node.end
@@ -73,6 +87,8 @@ function replaceRange(node) {
 
 replaceRange(ast)
 
-console.log(rename.uniqueNames(ast)) */
+console.log(rename.uniqueNames(ast, name => `s${name}`, i => (i.name.length === 1 || i.name.startsWith('__temp_'))))
 
 console.log(escodegen.generate(ast))
+
+// console.log(JSON.stringify(ast, null, 2))
