@@ -1,4 +1,4 @@
-const acorn = require('acorn')
+const espree = require('espree')
 const walk = require("acorn-walk")
 const escodegen = require('escodegen')
 const fs = require('fs')
@@ -14,15 +14,16 @@ if (!process.argv[2]) {
 }
 const test = fs.readFileSync(process.argv[2], 'utf8')
 // Parse very leniently because this is designed to parse any kind of code with little context required
-const ast = acorn.parse(test, {
+const ast = espree.parse(test, {
   ecmaVersion: "latest",
-  allowReserved: true,
-  allowReturnOutsideFunction: true,
-  allowImportExportEverywhere: true,
-  allowHashBang: true,
-  allowAwaitOutsideFunction: true,
-  allowSuperOutsideMethod: true
+  ecmaFeatures: {
+    globalReturn: true
+  },
+  range: true,
+  tokens: true, 
+  comment: true
 })
+escodegen.attachComments(ast, ast.comments, ast.tokens)
 
 // Import passes
 const logicalToIf = require('./passes/logicalToIf')
@@ -67,20 +68,15 @@ const rename = require('./rename')
 
 let uniqueFakeRange = 1
 
-// Recursively walk the AST and replace { start: x, end: y } with { range: [x, y] }
-// This makes it compatible with esprima
+// Recursively walk the AST and add fake range info if it doesn't have real range info
 function replaceRange(node) {
   if (node.type !== undefined) {
     if (node.start === undefined && node.end === undefined) {
       // Fake range to act as a unique identifier for the renaming logic
       // Extremely hacky, but it works
-      node.start = uniqueFakeRange * 10000000
-      node.end = uniqueFakeRange * 10000000 + 1
+      node.range = [uniqueFakeRange * 10000000, uniqueFakeRange * 10000000 + 1]
       uniqueFakeRange++
     }
-    node.range = [node.start, node.end]
-    delete node.start
-    delete node.end
   }
   // Call on all children
   for (let key in node) {
@@ -94,6 +90,6 @@ replaceRange(ast)
 
 rename.uniqueNames(ast, name => `s${name}`, i => (i.name.length === 1 || i.name.startsWith('__temp_')))
 
-console.log(escodegen.generate(ast))
+console.log(escodegen.generate(ast, { comment: true }))
 
 // console.log(JSON.stringify(ast, null, 2))

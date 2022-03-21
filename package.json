@@ -17,9 +17,9 @@
   },
   "homepage": "https://github.com/Heath123/smart-deminify#readme",
   "dependencies": {
-    "acorn": "^8.7.0",
     "acorn-walk": "^8.2.0",
     "escodegen": "^2.0.0",
+    "espree": "^9.3.1",
     "esrefactor": "github:Heath123/esrefactor",
     "estraverse": "^5.3.0"
   }
