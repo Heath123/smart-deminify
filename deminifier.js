@@ -88,7 +88,11 @@ module.exports.deminify = (code, progressCallback) => {
 
   replaceRange(ast)
 
-  rename.uniqueNames(ast, name => `s${name}`, i => (i.name.length === 1 || i.name.startsWith('__temp_')))
+  rename.uniqueNames(
+    ast,
+    (count, func) => func ? `func${count}` : `var${count}`,
+    i => (i.name.length < 3 || i.name.startsWith('__temp_'))
+  )
 
   return escodegen.generate(ast, { comment: true })
 }

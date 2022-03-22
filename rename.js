@@ -29,7 +29,10 @@ module.exports.uniqueNames = (code, getName, needsRenaming) => {
     // console.log(identifier.name)
 
     const id = ctx.identify(getStart(identifier))
-    code = ctx.rename(id, getName(nameCounter))
+    if (!id) {
+      continue
+    }
+    code = ctx.rename(id, getName(nameCounter, id.func))
     nameCounter++
 
     if (nameCounter % 1000 === 0) {
