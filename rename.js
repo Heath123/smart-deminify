@@ -5,7 +5,7 @@ function getStart (node) {
   return node.range ? node.range[0] : node.start
 }
 
-module.exports.uniqueNames = (code, getName, needsRenaming) => {
+module.exports.uniqueNames = (code, getName, needsRenaming, progressCallback) => {
   let nameCounter = 0
   const identifiers = []
 
@@ -36,11 +36,11 @@ module.exports.uniqueNames = (code, getName, needsRenaming) => {
     nameCounter++
 
     if (nameCounter % 1000 === 0) {
-      console.log(Math.round('Renaming symbols - ' + (nameCounter / count) * 10000) / 100 + '%...')
+      progressCallback(Math.round('Renaming symbols - ' + (nameCounter / count) * 10000) / 100 + '%...')
     }
   }
 
-  console.log('Renaming symbols - 100%...')
+  progressCallback('Renaming symbols - 100%...')
 
   return code
 }
