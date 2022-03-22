@@ -13,6 +13,9 @@ if (!process.argv[2]) {
   process.exit(1)
 }
 const test = fs.readFileSync(process.argv[2], 'utf8')
+
+console.log('Parsing file...')
+
 // Parse very leniently because this is designed to parse any kind of code with little context required
 const ast = espree.parse(test, {
   ecmaVersion: "latest",
@@ -24,6 +27,8 @@ const ast = espree.parse(test, {
   comment: true
 })
 escodegen.attachComments(ast, ast.comments, ast.tokens)
+
+console.log('Improving readability - 0/4...')
 
 // Import passes
 const logicalToIf = require('./passes/logicalToIf')
@@ -55,14 +60,18 @@ for (let i = 0; i < 3; i++) {
   walk.ancestor(ast, { LogicalExpression: unwrapExpressionLogical, ConditionalExpression: unwrapExpressionLogical })
   walk.ancestor(ast, { IfStatement: createElseIf })
 
-  // console.log(escodegen.generate(ast))
+  console.log('Improving readability - ' + (i + 1) + '/4...')
 }
 
 const swapEqualityComparision = require('./passes/swapEqualityComparision')
 const unwrapVariableDeclaration = require('./passes/unwrapVariableDeclaration')
 
+console.log('Improving readability - 4/4...')
+
 walk.ancestor(ast, { BinaryExpression: swapEqualityComparision })
 walk.ancestor(ast, { VariableDeclaration: unwrapVariableDeclaration })
+
+console.log("Renaming symbols - 0%...")
 
 const rename = require('./rename')
 
